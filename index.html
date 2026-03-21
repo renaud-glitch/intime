@@ -2,190 +2,267 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mon Journal</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<link rel="apple-touch-icon" sizes="192x192" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
-:root {
-  --bg: #0a0812; --surface: #110f1a; --surface2: #1a1628;
-  --border: rgba(255,255,255,0.07); --text: #f2eaf8;
-  --text-dim: #7a6e8a; --rose: #dc5078; --violet: #9b5de5; --nav-w: 72px;
-}
-
-/* LE FIX SCROLL */
-html, body { overflow-y: auto !important; height: auto !important; min-height: 100vh; margin: 0; background: var(--bg); color: var(--text); }
-body { font-family: 'DM Sans', sans-serif; display: flex; }
-
-.nav {
-  width: var(--nav-w); background: var(--surface); border-right: 1px solid var(--border);
-  position: fixed; top: 0; bottom: 0; left: 0; z-index: 100;
-  display: flex; flex-direction: column; align-items: center; padding: 20px 0;
-}
-
-.main { flex: 1; margin-left: var(--nav-w); padding: 20px 18px 120px; position: relative; }
-
-.tab {
-  width: 52px; height: 52px; background: transparent; border: none; color: var(--text-dim);
-  border-radius: 14px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;
-}
-.tab.active { background: rgba(220,80,120,0.2); color: #f07898; border: 1px solid rgba(220,80,120,0.3); }
-
-.widget {
-  background: linear-gradient(135deg, rgba(220,80,120,0.1), rgba(155,93,229,0.1));
-  border: 1px solid rgba(220,80,120,0.2); border-radius: 20px; padding: 16px; margin-bottom: 20px;
-}
-.widget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-.widget-stat { background: rgba(0,0,0,0.25); border-radius: 12px; padding: 10px; text-align: center; border: 1px solid var(--border); }
-.widget-num { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--rose); }
-.widget-phrase { 
-  background: rgba(220,80,120,0.1); border-left: 3px solid var(--rose); 
-  padding: 12px; border-radius: 8px; font-style: italic; font-size: 0.85rem; text-align: center; 
-}
-
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; }
-
-.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.bar-bg { flex: 1; background: #222; height: 14px; border-radius: 7px; overflow: hidden; position: relative; }
-.bar-fill { height: 100%; transition: width 0.8s ease-out; }
-.bar-count { position: absolute; right: 8px; top: 0; font-size: 10px; font-weight: bold; line-height: 14px; }
-
-.btn { background: linear-gradient(135deg, var(--rose), var(--violet)); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; }
-input, textarea { width: 100%; box-sizing: border-box; background: var(--surface2); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; font-family: inherit; }
-.cat-toggle { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding: 20px; }
+  h1 { text-align: center; color: #e94560; margin-bottom: 20px; font-size: 1.4em; }
+  .card { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .btn { background: #e94560; color: white; border: none; border-radius: 8px; padding: 12px 20px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 8px; }
+  .btn:hover { background: #c73652; }
+  .btn-danger { background: #c0392b; font-size: 0.8em; padding: 7px 14px; width: auto; margin-top: 0; border: none; border-radius: 6px; cursor: pointer; color: white; white-space: nowrap; }
+  .btn-danger:hover { background: #a93226; }
+  input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #0f3460; background: #0f3460; color: #eee; font-size: 1em; margin-top: 8px; }
+  textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #0f3460; background: #0f3460; color: #eee; font-size: 0.9em; margin-top: 8px; resize: none; height: 60px; }
+  .categories { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .cat-toggle { display: flex; align-items: center; gap: 10px; background: #0f3460; padding: 12px; border-radius: 8px; cursor: pointer; user-select: none; }
+  .cat-toggle input { width: 18px; height: 18px; cursor: pointer; accent-color: #e94560; }
+  .cat-emoji { font-size: 1.2em; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .stat-box { background: #0f3460; border-radius: 8px; padding: 12px; text-align: center; }
+  .stat-number { font-size: 1.6em; color: #e94560; font-weight: bold; }
+  .stat-label { font-size: 0.72em; color: #aaa; margin-top: 4px; }
+  .cat-stat-row { display: flex; justify-content: space-between; align-items: center; background: #0f3460; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; }
+  .cat-stat-count { font-size: 1.1em; font-weight: bold; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { flex: 1; padding: 10px; background: #0f3460; border: none; color: #aaa; border-radius: 8px; cursor: pointer; font-size: 0.85em; }
+  .tab.active { background: #e94560; color: white; }
+  .success-msg { background: #1a472a; color: #5cb85c; padding: 10px; border-radius: 8px; text-align: center; margin-top: 8px; display: none; }
+  .entry { background: #0f3460; border-radius: 8px; padding: 10px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .entry-info { flex: 1; }
+  .entry-cats { font-size: 0.75em; color: #e94560; margin-top: 3px; }
+  .entry-note { font-size: 0.75em; color: #aaa; margin-top: 2px; }
+  .month-title { color: #e94560; font-weight: bold; margin-bottom: 8px; font-size: 0.95em; }
+  .filter-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .filter-btn { padding: 6px 12px; border-radius: 20px; border: none; cursor: pointer; font-size: 0.8em; background: #0f3460; color: #aaa; }
+  .filter-btn.active { background: #e94560; color: white; }
+  .section-title { font-weight: bold; margin-bottom: 10px; font-size: 0.95em; }
+  .lbl { font-size: 0.9em; color: #aaa; margin-top: 12px; display: block; }
+  .month-block { margin-bottom: 14px; }
+  .month-block-title { font-size: 0.8em; color: #aaa; margin-bottom: 5px; }
+  .bar-group { display: flex; flex-direction: column; gap: 4px; }
+  .bar-row { display: flex; align-items: center; gap: 8px; }
+  .bar-cat-label { width: 24px; font-size: 1em; flex-shrink: 0; text-align: center; }
+  .bar-bg { flex: 1; background: #0f3460; border-radius: 4px; height: 16px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; display: flex; align-items: center; padding-left: 6px; min-width: 20px; }
+  .bar-fill.c-relation  { background: #e94560; }
+  .bar-fill.c-fellation { background: #f39c12; }
+  .bar-fill.c-sodomie   { background: #8e44ad; }
+  .bar-count { font-size: 0.7em; color: white; font-weight: bold; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.78em; color: #ccc; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .dot-relation  { background: #e94560; }
+  .dot-fellation { background: #f39c12; }
+  .dot-sodomie   { background: #8e44ad; }
 </style>
 </head>
 <body>
 
-<nav class="nav">
-  <div style="font-size: 1.5rem; color: var(--rose); margin-bottom: 25px;">♡</div>
-  <button class="tab active" id="btn-ajouter" onclick="showTab('ajouter')">➕</button>
-  <button class="tab" id="btn-stats" onclick="showTab('stats')">📊</button>
-  <button class="tab" id="btn-historique" onclick="showTab('historique')">📋</button>
-</nav>
+<h1>📕 Mon Journal</h1>
 
-<main class="main">
-  <div class="widget">
-    <div class="widget-grid">
-      <div class="widget-stat"><div class="widget-num" id="wEcart">-</div><div style="font-size:0.55rem">Écart</div></div>
-      <div class="widget-stat"><div class="widget-num" id="wMois">-</div><div style="font-size:0.55rem">Mois</div></div>
-      <div class="widget-stat"><div class="widget-num" id="wMoyenne">-</div><div style="font-size:0.55rem">Moyenne</div></div>
-      <div class="widget-stat"><div class="widget-num" id="wTotal">-</div><div style="font-size:0.55rem">Total</div></div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('ajouter')">➕ Ajouter</button>
+  <button class="tab" onclick="showTab('stats')">📊 Stats</button>
+  <button class="tab" onclick="showTab('historique')">📋 Historique</button>
+</div>
+
+<div id="tab-ajouter" class="card">
+  <label class="lbl">Date</label>
+  <input type="date" id="dateInput">
+  <label class="lbl">Catégories (plusieurs possibles)</label>
+  <div class="categories">
+    <label class="cat-toggle"><input type="checkbox" value="relation"><span class="cat-emoji">❤️</span><span>Relation intime</span></label>
+    <label class="cat-toggle"><input type="checkbox" value="fellation"><span class="cat-emoji">💋</span><span>Fellation</span></label>
+    <label class="cat-toggle"><input type="checkbox" value="sodomie"><span class="cat-emoji">🔥</span><span>Sodomie</span></label>
+  </div>
+  <label class="lbl">Note (optionnelle)</label>
+  <textarea id="noteInput" placeholder="Optionnel..."></textarea>
+  <button class="btn" onclick="ajouterEntree()">✅ Enregistrer</button>
+  <div class="success-msg" id="successMsg">✓ Enregistré !</div>
+</div>
+
+<div id="tab-stats" style="display:none;">
+  <div class="card">
+    <div class="section-title">📊 Vue globale</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-number" id="statTotal">0</div><div class="stat-label">Total entrées</div></div>
+      <div class="stat-box"><div class="stat-number" id="statMoyenne">0</div><div class="stat-label">Moy. / mois</div></div>
+      <div class="stat-box"><div class="stat-number" id="statMeilleur">-</div><div class="stat-label">Meilleur mois</div></div>
+      <div class="stat-box"><div class="stat-number" id="statDernier">-</div><div class="stat-label">Dernier écart</div></div>
     </div>
-    <div class="widget-phrase" id="wPhrase">Chargement...</div>
   </div>
-
-  <div id="tab-ajouter">
-    <div class="card">
-      <input type="date" id="dateInput">
-      <div id="catList">
-        <label class="cat-toggle"><input type="checkbox" value="relation"> ❤️ Relation</label>
-        <label class="cat-toggle"><input type="checkbox" value="fellation"> 💋 Fellation</label>
-        <label class="cat-toggle"><input type="checkbox" value="pegging"> 🔥 Pegging</label>
-      </div>
-      <textarea id="noteInput" placeholder="Note..."></textarea>
-      <button class="btn" onclick="ajouterEntree()">Enregistrer</button>
+  <div class="card">
+    <div class="section-title">🏷️ Total par catégorie</div>
+    <div id="catStats"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">📈 Stats par mois et par catégorie</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot dot-relation"></div> ❤️ Relation</div>
+      <div class="legend-item"><div class="legend-dot dot-fellation"></div> 💋 Fellation</div>
+      <div class="legend-item"><div class="legend-dot dot-sodomie"></div> 🔥 Sodomie</div>
     </div>
+    <div id="barChart"></div>
   </div>
+</div>
 
-  <div id="tab-stats" style="display:none">
-    <div class="card"><h3>Répartition</h3><div id="barChart"></div></div>
+<div id="tab-historique" style="display:none;">
+  <div class="filter-btns">
+    <button class="filter-btn active" onclick="setFilter('tous')">Tous</button>
+    <button class="filter-btn" onclick="setFilter('relation')">❤️ Relation</button>
+    <button class="filter-btn" onclick="setFilter('fellation')">💋 Fellation</button>
+    <button class="filter-btn" onclick="setFilter('sodomie')">🔥 Sodomie</button>
   </div>
-
-  <div id="tab-historique" style="display:none">
-    <div id="historiqueContainer"></div>
-  </div>
-</main>
+  <div id="historiqueContainer"></div>
+</div>
 
 <script>
-firebase.initializeApp({
-  apiKey: "AIzaSyAOGyrBGK_K2Sl_sJ3Y8ZwF9Z9hE0I7Vwk",
-  databaseURL: "https://carnet-intime-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "carnet-intime"
-});
-const db = firebase.database();
-firebase.auth().signInAnonymously();
+  const CATS = {
+    relation:  { label: 'Relation intime', emoji: '❤️', color: '#e94560' },
+    fellation: { label: 'Fellation',       emoji: '💋', color: '#f39c12' },
+    sodomie:   { label: 'Sodomie',         emoji: '🔥', color: '#8e44ad' }
+  };
+  const CAT_KEYS = ['relation','fellation','sodomie'];
+  let currentFilter = 'tous';
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('dateInput').value = todayStr;
 
-const CATS = {
-  relation: {emoji:'❤️', label:'Relation', color: '#dc5078'},
-  fellation: {emoji:'💋', label:'Fellation', color: '#f4a24a'},
-  pegging: {emoji:'🔥', label:'Pegging', color: '#9b5de5'}
-};
+  function getData() { try { return JSON.parse(localStorage.getItem('tracker_v3')||'[]'); } catch { return []; } }
+  function saveData(d) { localStorage.setItem('tracker_v3', JSON.stringify(d)); }
+  function genId() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
-let allData = [];
-
-db.ref('journal').on('value', snap => {
-  allData = [];
-  snap.forEach(c => { allData.push({...c.val(), key: c.key}); });
-  allData.sort((a,b) => b.date.localeCompare(a.date));
-  renderAll();
-});
-
-function showTab(t) {
-  ['ajouter', 'stats', 'historique'].forEach(id => {
-    document.getElementById('tab-'+id).style.display = (id === t) ? 'block' : 'none';
-    document.getElementById('btn-'+id).classList.toggle('active', id === t);
-  });
-}
-
-function ajouterEntree() {
-  const date = document.getElementById('dateInput').value;
-  const note = document.getElementById('noteInput').value;
-  const cats = [...document.querySelectorAll('#catList input:checked')].map(i => i.value);
-  if(!date || cats.length === 0) return alert("Date et catégorie !");
-  db.ref('journal').push({date, cats, note}).then(() => {
-    document.getElementById('noteInput').value = "";
-    document.querySelectorAll('#catList input').forEach(i => i.checked = false);
-    showTab('historique');
-  });
-}
-
-function renderAll() {
-  if(allData.length > 0) {
-    document.getElementById('wTotal').textContent = allData.length;
-    document.getElementById('wMois').textContent = allData.filter(e => e.date.startsWith(new Date().toISOString().substring(0,7))).length;
-    const diff = Math.floor((new Date() - new Date(allData[0].date)) / 86400000);
-    document.getElementById('wEcart').textContent = diff + "j";
-    
-    // LA PHRASE RIGOLOTE
-    let p = "";
-    if(diff === 0) p = "Aujourd'hui ? Quelle santé ! 🔥";
-    else if(diff < 3) p = "On garde le rythme, c'est bien. 😏";
-    else if(diff < 7) p = "Ça commence à faire long, non ? 🙄";
-    else p = "Alerte sécheresse ! Il faut agir. 🏜️";
-    document.getElementById('wPhrase').textContent = p;
-
-    const months = [...new Set(allData.map(e => e.date.substring(0,7)))].length;
-    document.getElementById('wMoyenne').textContent = (allData.length / (months || 1)).toFixed(1);
+  function showTab(tab) {
+    ['ajouter','stats','historique'].forEach(t => document.getElementById('tab-'+t).style.display = t===tab?'block':'none');
+    document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active',['ajouter','stats','historique'][i]===tab));
+    if(tab==='stats') renderStats();
+    if(tab==='historique') renderHistorique();
   }
 
-  const counts = { relation: 0, fellation: 0, pegging: 0 };
-  allData.forEach(e => e.cats?.forEach(c => counts[c]++));
-  const max = Math.max(...Object.values(counts), 1);
-  document.getElementById('barChart').innerHTML = Object.keys(counts).map(k => `
-    <div class="bar-row">
-      <div style="font-size:1.1rem">${CATS[k].emoji}</div>
-      <div class="bar-bg">
-        <div class="bar-fill" style="width:${(counts[k]/max)*100}%; background:${CATS[k].color}"></div>
-        <span class="bar-count">${counts[k]}</span>
-      </div>
-    </div>
-  `).join('');
+  function ajouterEntree() {
+    const date = document.getElementById('dateInput').value;
+    const note = document.getElementById('noteInput').value.trim();
+    const cats = [...document.querySelectorAll('.categories input:checked')].map(el=>el.value);
+    if(!date) { alert('Sélectionne une date.'); return; }
+    if(!cats.length) { alert('Sélectionne au moins une catégorie.'); return; }
+    const data = getData();
+    data.push({id:genId(),date,cats,note});
+    data.sort((a,b)=>b.date.localeCompare(a.date));
+    saveData(data);
+    document.querySelectorAll('.categories input').forEach(el=>el.checked=false);
+    document.getElementById('noteInput').value='';
+    document.getElementById('dateInput').value=todayStr;
+    const msg=document.getElementById('successMsg');
+    msg.style.display='block';
+    setTimeout(()=>msg.style.display='none',2000);
+  }
 
-  document.getElementById('historiqueContainer').innerHTML = allData.map(e => `
-    <div class="card">
-      <div style="display:flex; justify-content:space-between">
-        <b>${e.date}</b>
-        <button onclick="if(confirm('Supprimer ?')) db.ref('journal/${e.key}').remove()" style="color:red; background:none; border:none; cursor:pointer">🗑️</button>
-      </div>
-      <div style="color:var(--rose); margin:10px 0">${e.cats.map(c => CATS[c].emoji).join(' ')}</div>
-      <div style="font-size:0.9rem; opacity:0.8">${e.note || ''}</div>
-    </div>
-  `).join('');
-}
-document.getElementById('dateInput').value = new Date().toISOString().substring(0,10);
+  function supprimerEntree(id) {
+    if(!confirm('Supprimer cette entrée ?')) return;
+    saveData(getData().filter(e=>e.id!==id));
+    renderHistorique();
+  }
+
+  function getMoisLabel(key) {
+    const [y,m]=key.split('-');
+    return ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]+' '+y;
+  }
+
+  function groupByMonth(data) {
+    const g={};
+    data.forEach(e=>{ const k=e.date.substring(0,7); if(!g[k]) g[k]=[]; g[k].push(e); });
+    return g;
+  }
+
+  function renderStats() {
+    const data=getData();
+    const empty='<div style="color:#aaa;font-size:0.85em;text-align:center;padding:16px;">Aucune donnée</div>';
+    if(!data.length) {
+      ['statTotal','statMoyenne','statMeilleur','statDernier'].forEach(id=>document.getElementById(id).textContent='-');
+      document.getElementById('catStats').innerHTML=empty;
+      document.getElementById('barChart').innerHTML=empty;
+      return;
+    }
+    const groups=groupByMonth(data);
+    const keys=Object.keys(groups).sort();
+    const counts=keys.map(k=>groups[k].length);
+    const max=Math.max(...counts);
+    const meilleurKey=keys[counts.indexOf(max)];
+    const moyenne=(data.length/keys.length).toFixed(1);
+    let dernierEcart='-';
+    if(data.length>=2) {
+      const s=[...data].sort((a,b)=>b.date.localeCompare(a.date));
+      const diff=Math.round((new Date(s[0].date)-new Date(s[1].date))/86400000);
+      dernierEcart=diff+'j';
+    }
+    document.getElementById('statTotal').textContent=data.length;
+    document.getElementById('statMoyenne').textContent=moyenne;
+    document.getElementById('statMeilleur').textContent=getMoisLabel(meilleurKey)+' ('+max+')';
+    document.getElementById('statDernier').textContent=dernierEcart;
+
+    const cc={relation:0,fellation:0,sodomie:0};
+    data.forEach(e=>e.cats.forEach(c=>{if(cc[c]!==undefined) cc[c]++;}));
+    document.getElementById('catStats').innerHTML=CAT_KEYS.map(k=>
+      `<div class="cat-stat-row"><span>${CATS[k].emoji} ${CATS[k].label}</span><span class="cat-stat-count" style="color:${CATS[k].color}">${cc[k]}</span></div>`
+    ).join('');
+
+    const recentKeys=keys.slice(-6).reverse();
+    let globalMax=1;
+    recentKeys.forEach(k=>CAT_KEYS.forEach(cat=>{
+      const c=groups[k].filter(e=>e.cats.includes(cat)).length;
+      if(c>globalMax) globalMax=c;
+    }));
+    document.getElementById('barChart').innerHTML=recentKeys.map(k=>{
+      const bars=CAT_KEYS.map(cat=>{
+        const c=groups[k].filter(e=>e.cats.includes(cat)).length;
+        const pct=c===0?0:Math.max(Math.round(c/globalMax*100),10);
+        return `<div class="bar-row">
+          <div class="bar-cat-label">${CATS[cat].emoji}</div>
+          <div class="bar-bg">${c>0
+            ?`<div class="bar-fill c-${cat}" style="width:${pct}%"><span class="bar-count">${c}</span></div>`
+            :`<div style="height:100%;display:flex;align-items:center;padding-left:8px;font-size:0.7em;color:#555;">0</div>`
+          }</div>
+        </div>`;
+      }).join('');
+      return `<div class="month-block">
+        <div class="month-block-title">📅 ${getMoisLabel(k)} — ${groups[k].length} total</div>
+        <div class="bar-group">${bars}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function setFilter(filter) {
+    currentFilter=filter;
+    document.querySelectorAll('.filter-btn').forEach((btn,i)=>btn.classList.toggle('active',['tous','relation','fellation','sodomie'][i]===filter));
+    renderHistorique();
+  }
+
+  function renderHistorique() {
+    const allData=getData();
+    const data=currentFilter==='tous'?allData:allData.filter(e=>e.cats.includes(currentFilter));
+    const container=document.getElementById('historiqueContainer');
+    if(!data.length) { container.innerHTML='<div class="card" style="text-align:center;color:#aaa;padding:20px;">Aucune entrée</div>'; return; }
+    const groups=groupByMonth(data);
+    const keys=Object.keys(groups).sort().reverse();
+    container.innerHTML=keys.map(k=>{
+      const entries=groups[k].map(e=>{
+        const dateF=new Date(e.date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+        const catsStr=e.cats.map(c=>CATS[c]?CATS[c].emoji+' '+CATS[c].label:c).join(' · ');
+        return `<div class="entry">
+          <div class="entry-info">
+            <div style="font-size:0.9em">📅 ${dateF}</div>
+            <div class="entry-cats">${catsStr}</div>
+            ${e.note?`<div class="entry-note">💬 ${e.note}</div>`:''}
+          </div>
+          <button class="btn-danger" onclick="supprimerEntree('${e.id}')">🗑️ Supprimer</button>
+        </div>`;
+      }).join('');
+      return `<div class="card"><div class="month-title">${getMoisLabel(k)} — ${groups[k].length} entrée(s)</div>${entries}</div>`;
+    }).join('');
+  }
 </script>
 </body>
 </html>
