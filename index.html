@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Mon Journal</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -15,19 +20,20 @@
   --text-dim: #7a6e8a; --rose: #dc5078; --nav-w: 72px;
 }
 
-/* --- LE FIX POUR LE SCROLL --- */
+/* --- FIX SCROLL --- */
 html, body {
-  margin: 0; padding: 0;
+  overflow-y: auto !important;
+  height: auto !important;
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  overflow-y: auto !important; /* Pour pouvoir scroller */
-  height: auto !important;     /* Pour ne pas être bloqué à 100% */
 }
 
 body {
   font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 .nav {
@@ -37,9 +43,15 @@ body {
 }
 
 .main {
-  flex: 1; margin-left: var(--nav-w); padding: 20px 18px 120px;
-  min-height: 100vh; position: relative;
+  flex: 1; margin-left: var(--nav-w); padding: 20px 18px 100px;
+  position: relative;
 }
+
+.tab {
+  width: 52px; height: 52px; background: transparent; border: none; color: var(--text-dim);
+  border-radius: 14px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;
+}
+.tab.active { background: rgba(220,80,120,0.2); color: #f07898; border: 1px solid rgba(220,80,120,0.3); }
 
 .widget {
   background: linear-gradient(135deg, rgba(220,80,120,0.1), rgba(155,93,229,0.1));
@@ -49,24 +61,16 @@ body {
 .widget-stat { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; text-align: center; border: 1px solid var(--border); }
 .widget-num { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--rose); }
 
-.tab {
-  width: 52px; height: 52px; background: transparent; border: none; color: var(--text-dim);
-  border-radius: 14px; cursor: pointer; margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.tab.active { background: rgba(220,80,120,0.2); color: #f07898; border: 1px solid rgba(220,80,120,0.3); }
-
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; }
-
-.btn { background: linear-gradient(135deg, var(--rose), #9b5de5); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; }
-input, textarea { width: 100%; box-sizing: border-box; background: var(--surface2); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; font-family: inherit; }
-
+.btn { background: linear-gradient(135deg, var(--rose), #9b5de5); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+input, textarea { width: 100%; box-sizing: border-box; background: var(--surface2); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
 .cat-toggle { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <nav class="nav">
-  <div style="font-size: 1.5rem; color: var(--rose); margin-bottom: 20px;">♡</div>
+  <div style="font-size: 1.5rem; color: var(--rose); margin-bottom: 25px;">♡</div>
   <button class="tab active" id="btn-ajouter" onclick="showTab('ajouter')">➕</button>
   <button class="tab" id="btn-stats" onclick="showTab('stats')">📊</button>
   <button class="tab" id="btn-historique" onclick="showTab('historique')">📋</button>
@@ -94,7 +98,7 @@ input, textarea { width: 100%; box-sizing: border-box; background: var(--surface
   </div>
 
   <div id="tab-stats" style="display:none">
-    <div class="card"><h3>Statistiques</h3><div id="catStats"></div></div>
+    <div class="card"><h3>Stats par catégorie</h3><div id="catStats"></div></div>
   </div>
 
   <div id="tab-historique" style="display:none">
@@ -103,6 +107,10 @@ input, textarea { width: 100%; box-sizing: border-box; background: var(--surface
 </main>
 
 <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(() => console.log("SW OK"));
+}
+
 firebase.initializeApp({
   apiKey: "AIzaSyAOGyrBGK_K2Sl_sJ3Y8ZwF9Z9hE0I7Vwk",
   databaseURL: "https://carnet-intime-default-rtdb.europe-west1.firebasedatabase.app/",
@@ -137,8 +145,7 @@ function ajouterEntree() {
   const date = document.getElementById('dateInput').value;
   const note = document.getElementById('noteInput').value;
   const cats = [...document.querySelectorAll('#catList input:checked')].map(i => i.value);
-  if(!date || cats.length === 0) return alert("Date et catégorie obligatoires !");
-
+  if(!date || cats.length === 0) return alert("Date et catégorie !");
   db.ref('journal').push({date, cats, note}).then(() => {
     document.getElementById('noteInput').value = "";
     document.querySelectorAll('#catList input').forEach(i => i.checked = false);
@@ -147,35 +154,44 @@ function ajouterEntree() {
 }
 
 function renderAll() {
-  // Widgets
+  renderWidget();
+  renderStats();
+  renderHistorique();
+}
+
+function renderWidget() {
   if(allData.length > 0) {
     document.getElementById('wMois').textContent = allData.filter(e => e.date.startsWith(new Date().toISOString().substring(0,7))).length;
     const last = new Date(allData[0].date);
     const diff = Math.floor((new Date() - last) / 86400000);
     document.getElementById('wEcart').textContent = diff + "j";
   }
+}
 
-  // Stats
+function renderStats() {
   const counts = { relation: 0, fellation: 0, pegging: 0 };
   allData.forEach(e => e.cats?.forEach(c => counts[c]++));
   document.getElementById('catStats').innerHTML = Object.keys(counts).map(k => `
     <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-      <span>${CATS[k].emoji} ${CATS[k].label}</span><b>${counts[k]}</b>
+      <span>${CATS[k].emoji} ${CATS[k].label}</span>
+      <span style="font-weight:bold">${counts[k]}</span>
     </div>
   `).join('');
+}
 
-  // Historique
+function renderHistorique() {
   document.getElementById('historiqueContainer').innerHTML = allData.map(e => `
     <div class="card">
       <div style="display:flex; justify-content:space-between">
-        <b>${e.date}</b>
-        <button onclick="db.ref('journal/${e.key}').remove()" style="color:red; background:none; border:none">🗑️</button>
+        <span style="font-weight:bold">${e.date}</span>
+        <button onclick="db.ref('journal/${e.key}').remove()" style="color:red; background:none; border:none; cursor:pointer">🗑️</button>
       </div>
-      <div style="color:var(--rose)">${e.cats.map(c => CATS[c].emoji).join(' ')}</div>
+      <div style="color:var(--rose); margin:5px 0">${e.cats.map(c => CATS[c].emoji).join(' ')}</div>
       <div style="font-size:0.85rem; opacity:0.8">${e.note || ''}</div>
     </div>
   `).join('');
 }
+
 document.getElementById('dateInput').value = new Date().toISOString().substring(0,10);
 </script>
 </body>
