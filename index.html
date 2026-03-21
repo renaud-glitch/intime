@@ -4,11 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Mon Journal</title>
-<link rel="icon" type="image/png" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -17,24 +12,12 @@
 :root {
   --bg: #0a0812; --surface: #110f1a; --surface2: #1a1628;
   --border: rgba(255,255,255,0.07); --text: #f2eaf8;
-  --text-dim: #7a6e8a; --rose: #dc5078; --nav-w: 72px;
+  --text-dim: #7a6e8a; --rose: #dc5078; --violet: #9b5de5; --nav-w: 72px;
 }
 
-/* --- FIX SCROLL --- */
-html, body {
-  overflow-y: auto !important;
-  height: auto !important;
-  min-height: 100vh;
-}
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  margin: 0;
-  overflow-x: hidden;
-}
+/* LE FIX SCROLL */
+html, body { overflow-y: auto !important; height: auto !important; min-height: 100vh; margin: 0; background: var(--bg); color: var(--text); }
+body { font-family: 'DM Sans', sans-serif; display: flex; }
 
 .nav {
   width: var(--nav-w); background: var(--surface); border-right: 1px solid var(--border);
@@ -42,10 +25,7 @@ body {
   display: flex; flex-direction: column; align-items: center; padding: 20px 0;
 }
 
-.main {
-  flex: 1; margin-left: var(--nav-w); padding: 20px 18px 100px;
-  position: relative;
-}
+.main { flex: 1; margin-left: var(--nav-w); padding: 20px 18px 120px; position: relative; }
 
 .tab {
   width: 52px; height: 52px; background: transparent; border: none; color: var(--text-dim);
@@ -57,13 +37,23 @@ body {
   background: linear-gradient(135deg, rgba(220,80,120,0.1), rgba(155,93,229,0.1));
   border: 1px solid rgba(220,80,120,0.2); border-radius: 20px; padding: 16px; margin-bottom: 20px;
 }
-.widget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.widget-stat { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; text-align: center; border: 1px solid var(--border); }
+.widget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+.widget-stat { background: rgba(0,0,0,0.25); border-radius: 12px; padding: 10px; text-align: center; border: 1px solid var(--border); }
 .widget-num { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--rose); }
+.widget-phrase { 
+  background: rgba(220,80,120,0.1); border-left: 3px solid var(--rose); 
+  padding: 12px; border-radius: 8px; font-style: italic; font-size: 0.85rem; text-align: center; 
+}
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; }
-.btn { background: linear-gradient(135deg, var(--rose), #9b5de5); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-input, textarea { width: 100%; box-sizing: border-box; background: var(--surface2); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.bar-bg { flex: 1; background: #222; height: 14px; border-radius: 7px; overflow: hidden; position: relative; }
+.bar-fill { height: 100%; transition: width 0.8s ease-out; }
+.bar-count { position: absolute; right: 8px; top: 0; font-size: 10px; font-weight: bold; line-height: 14px; }
+
+.btn { background: linear-gradient(135deg, var(--rose), var(--violet)); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; }
+input, textarea { width: 100%; box-sizing: border-box; background: var(--surface2); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; font-family: inherit; }
 .cat-toggle { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; }
 </style>
 </head>
@@ -79,9 +69,12 @@ input, textarea { width: 100%; box-sizing: border-box; background: var(--surface
 <main class="main">
   <div class="widget">
     <div class="widget-grid">
-      <div class="widget-stat"><div class="widget-num" id="wEcart">-</div><div style="font-size:0.6rem">Dernier écart</div></div>
-      <div class="widget-stat"><div class="widget-num" id="wMois">-</div><div style="font-size:0.6rem">Ce mois-ci</div></div>
+      <div class="widget-stat"><div class="widget-num" id="wEcart">-</div><div style="font-size:0.55rem">Écart</div></div>
+      <div class="widget-stat"><div class="widget-num" id="wMois">-</div><div style="font-size:0.55rem">Mois</div></div>
+      <div class="widget-stat"><div class="widget-num" id="wMoyenne">-</div><div style="font-size:0.55rem">Moyenne</div></div>
+      <div class="widget-stat"><div class="widget-num" id="wTotal">-</div><div style="font-size:0.55rem">Total</div></div>
     </div>
+    <div class="widget-phrase" id="wPhrase">Chargement...</div>
   </div>
 
   <div id="tab-ajouter">
@@ -98,7 +91,7 @@ input, textarea { width: 100%; box-sizing: border-box; background: var(--surface
   </div>
 
   <div id="tab-stats" style="display:none">
-    <div class="card"><h3>Stats par catégorie</h3><div id="catStats"></div></div>
+    <div class="card"><h3>Répartition</h3><div id="barChart"></div></div>
   </div>
 
   <div id="tab-historique" style="display:none">
@@ -107,10 +100,6 @@ input, textarea { width: 100%; box-sizing: border-box; background: var(--surface
 </main>
 
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(() => console.log("SW OK"));
-}
-
 firebase.initializeApp({
   apiKey: "AIzaSyAOGyrBGK_K2Sl_sJ3Y8ZwF9Z9hE0I7Vwk",
   databaseURL: "https://carnet-intime-default-rtdb.europe-west1.firebasedatabase.app/",
@@ -120,9 +109,9 @@ const db = firebase.database();
 firebase.auth().signInAnonymously();
 
 const CATS = {
-  relation: {emoji:'❤️', label:'Relation'},
-  fellation: {emoji:'💋', label:'Fellation'},
-  pegging: {emoji:'🔥', label:'Pegging'}
+  relation: {emoji:'❤️', label:'Relation', color: '#dc5078'},
+  fellation: {emoji:'💋', label:'Fellation', color: '#f4a24a'},
+  pegging: {emoji:'🔥', label:'Pegging', color: '#9b5de5'}
 };
 
 let allData = [];
@@ -154,44 +143,48 @@ function ajouterEntree() {
 }
 
 function renderAll() {
-  renderWidget();
-  renderStats();
-  renderHistorique();
-}
-
-function renderWidget() {
   if(allData.length > 0) {
+    document.getElementById('wTotal').textContent = allData.length;
     document.getElementById('wMois').textContent = allData.filter(e => e.date.startsWith(new Date().toISOString().substring(0,7))).length;
-    const last = new Date(allData[0].date);
-    const diff = Math.floor((new Date() - last) / 86400000);
+    const diff = Math.floor((new Date() - new Date(allData[0].date)) / 86400000);
     document.getElementById('wEcart').textContent = diff + "j";
-  }
-}
+    
+    // LA PHRASE RIGOLOTE
+    let p = "";
+    if(diff === 0) p = "Aujourd'hui ? Quelle santé ! 🔥";
+    else if(diff < 3) p = "On garde le rythme, c'est bien. 😏";
+    else if(diff < 7) p = "Ça commence à faire long, non ? 🙄";
+    else p = "Alerte sécheresse ! Il faut agir. 🏜️";
+    document.getElementById('wPhrase').textContent = p;
 
-function renderStats() {
+    const months = [...new Set(allData.map(e => e.date.substring(0,7)))].length;
+    document.getElementById('wMoyenne').textContent = (allData.length / (months || 1)).toFixed(1);
+  }
+
   const counts = { relation: 0, fellation: 0, pegging: 0 };
   allData.forEach(e => e.cats?.forEach(c => counts[c]++));
-  document.getElementById('catStats').innerHTML = Object.keys(counts).map(k => `
-    <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-      <span>${CATS[k].emoji} ${CATS[k].label}</span>
-      <span style="font-weight:bold">${counts[k]}</span>
+  const max = Math.max(...Object.values(counts), 1);
+  document.getElementById('barChart').innerHTML = Object.keys(counts).map(k => `
+    <div class="bar-row">
+      <div style="font-size:1.1rem">${CATS[k].emoji}</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:${(counts[k]/max)*100}%; background:${CATS[k].color}"></div>
+        <span class="bar-count">${counts[k]}</span>
+      </div>
     </div>
   `).join('');
-}
 
-function renderHistorique() {
   document.getElementById('historiqueContainer').innerHTML = allData.map(e => `
     <div class="card">
       <div style="display:flex; justify-content:space-between">
-        <span style="font-weight:bold">${e.date}</span>
-        <button onclick="db.ref('journal/${e.key}').remove()" style="color:red; background:none; border:none; cursor:pointer">🗑️</button>
+        <b>${e.date}</b>
+        <button onclick="if(confirm('Supprimer ?')) db.ref('journal/${e.key}').remove()" style="color:red; background:none; border:none; cursor:pointer">🗑️</button>
       </div>
-      <div style="color:var(--rose); margin:5px 0">${e.cats.map(c => CATS[c].emoji).join(' ')}</div>
-      <div style="font-size:0.85rem; opacity:0.8">${e.note || ''}</div>
+      <div style="color:var(--rose); margin:10px 0">${e.cats.map(c => CATS[c].emoji).join(' ')}</div>
+      <div style="font-size:0.9rem; opacity:0.8">${e.note || ''}</div>
     </div>
   `).join('');
 }
-
 document.getElementById('dateInput').value = new Date().toISOString().substring(0,10);
 </script>
 </body>
