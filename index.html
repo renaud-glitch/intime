@@ -201,12 +201,20 @@
       // Chargement des données
       db.ref('journal').on('value', snap => {
         allData = [];
-        snap.forEach(c => allData.push({...c.val(), key:c.key}));
-        allData.sort((a,b) => b.date.localeCompare(a.date));
-        renderWidget();
-        const activeTab = document.querySelector('.tab.active').id.replace('btn-','');
-        if(activeTab==='stats') renderStats();
-        if(activeTab==='historique') renderHistorique();
+        // On remplit le tableau avec toutes les entrées de la base
+        snap.forEach(c => {
+          allData.push({...c.val(), key: c.key});
+        });
+
+        // Tri par date (plus récent en haut)
+        allData.sort((a, b) => b.date.localeCompare(a.date));
+
+        // MISE À JOUR DE TOUTES LES VUES SYSTÉMATIQUEMENT
+        renderWidget();     // Le résumé en haut
+        renderStats();      // Les graphiques
+        renderHistorique(); // La liste complète
+        
+        console.log("Données reçues : " + allData.length + " entrées.");
       });
     })
     .catch((error) => {
