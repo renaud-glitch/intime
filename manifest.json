@@ -3,12 +3,10 @@
   "short_name": "Journal",
   "description": "Journal intime personnel",
   "start_url": "./index.html",
-  "id": "/intime/",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0d0d1a",
   "theme_color": "#e94560",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "icon.png",
