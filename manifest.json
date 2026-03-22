@@ -1,0 +1,26 @@
+{
+  "name": "Mon Journal Intime",
+  "short_name": "Journal",
+  "description": "Journal intime personnel",
+  "start_url": "./index.html",
+  "id": "/intime/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0d1a",
+  "theme_color": "#e94560",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
