@@ -2,9 +2,9 @@
   "name": "Mon Journal Intime",
   "short_name": "Journal",
   "description": "Journal intime personnel",
-  "start_url": "./",
+  "start_url": "/",
   "id": "mon-journal-pwa",
-  "scope": "./",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0d0d1a",
   "theme_color": "#e94560",
@@ -21,6 +21,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

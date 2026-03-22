@@ -6,6 +6,12 @@
 <title>Mon Journal</title>
 <link rel="icon" type="image/png" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#e94560">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Journal">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -36,6 +42,12 @@
   .tab-label { font-size:0.55rem; font-weight:800; text-transform:uppercase; margin-top:3px; color:inherit; }
   .sync-dot { width:8px;height:8px; border-radius:50%; background:#444; margin-top:auto; margin-bottom:10px; }
   .sync-dot.online { background:#4ade80; box-shadow:0 0 6px #4ade80; }
+  #installBtn {
+    display:none; width:44px; height:44px; border:2px solid #e94560; background:rgba(233,69,96,0.15);
+    color:#e94560; border-radius:14px; font-size:1.2rem; flex-direction:column; align-items:center;
+    justify-content:center; cursor:pointer; margin-bottom:8px; transition:all 0.2s;
+  }
+  #installBtn:hover { background:rgba(233,69,96,0.3); }
   .main-content { flex:1; margin-left:var(--nav-width); padding:20px; overflow-y:auto; height:100vh; }
   header { margin-bottom:18px; }
   h1 { font-size:1.6rem; font-weight:900; background:linear-gradient(135deg,#e94560,#8e44ad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
@@ -95,6 +107,7 @@
   <div class="tab active" id="btn-ajouter" onclick="showTab('ajouter')">➕<span class="tab-label">Ajout</span></div>
   <div class="tab" id="btn-stats" onclick="showTab('stats')">📊<span class="tab-label">Stats</span></div>
   <div class="tab" id="btn-historique" onclick="showTab('historique')">📋<span class="tab-label">Hist.</span></div>
+  <button id="installBtn" title="Installer l'application">📲<span class="tab-label">Install</span></button>
   <div class="sync-dot" id="syncDot"></div>
 </nav>
 
@@ -398,6 +411,26 @@ function renderHistorique() {
         .catch(err => console.log('Échec de l\'enregistrement du Service Worker :', err));
     });
   }
+
+  // Bouton d'installation PWA
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'flex';
+  });
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    deferredPrompt = null;
+  });
 </script>
 </body>
 </html>
